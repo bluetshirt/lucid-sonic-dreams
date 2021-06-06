@@ -176,7 +176,7 @@ class LucidSonicDream:
         print(f'Loading networks from {weights_file}...')
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         with self.dnnlib.util.open_url(weights_file) as f:
-            self.Gs = self.legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
+            self.Gs = self.legacy.load_network_pkl(f)['G_ema'].to(device).float() # type: ignore
     
     # Auto assign num_possible_classes attribute
     try:
@@ -590,7 +590,7 @@ class LucidSonicDream:
                 noise_batch = torch.from_numpy(noise_batch).to(device)
                 w_batch = self.Gs.mapping(noise_batch, class_batch)
                 with torch.no_grad():
-                    image_batch = self.Gs.synthesis(w_batch, **Gs_syn_kwargs).detach().cpu()
+                    image_batch = self.Gs.synthesis(w_batch, **Gs_syn_kwargs, force_fp32=True).detach().cpu()
 
         # For each image in generated batch: apply effects, resize, and save
         for j, image in enumerate(image_batch): 
